@@ -6,6 +6,7 @@ import pronouncing
 import json
 
 
+
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
@@ -54,6 +55,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     if name:
 
+        if not isinstance(name,str):
+            return func.HttpResponse(status_code=400)
+        
+        if not 0 < len(name) <= 255:
+            return func.HttpResponse(status_code=400)
+
         try:
             pronunciation_characters = []
             phonetics = pronouncing.phones_for_word(name)
@@ -74,4 +81,4 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         return func.HttpResponse(json.dumps(pronunciation),status_code=200)
     else:
-        return func.HttpResponse(status_code=404)
+        return func.HttpResponse(status_code=400)
