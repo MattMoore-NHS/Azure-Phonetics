@@ -13,8 +13,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     MAPPING = {
         'AA0':'aa',
         'AA1':'aa',
-        'AE0':'ae',
-        'AE1':'ae',
+        'AE0':'a',
+        'AE1':'a',
         'AH0':'ah',
         'AH1':'ah',
         'AO0':'ao',
