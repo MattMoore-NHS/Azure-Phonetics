@@ -13,6 +13,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     MAPPING = {
         'AA0':'aa',
         'AA1':'aa',
+        'AA2':'aa',
         'AE0':'a',
         'AE1':'a',
         'AH0':'ah',
@@ -45,6 +46,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     }
 
     name = req.params.get('name')
+    logging.info("Name: %s" % name)
+
     if not name:
         try:
             req_body = req.get_json()
@@ -64,6 +67,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         try:
             pronunciation_characters = []
             phonetics = pronouncing.phones_for_word(name)
+            logging.info("Phonetic Spelling: %s" % phonetics)
         
             for phonetic in phonetics:
                 phonetic_characters = phonetic.split()
@@ -72,6 +76,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                         pronunciation_characters.append(MAPPING[character])
                     else:
                         pronunciation_characters.append(character)
+
+                break
             
             delimiter = '-'
             pronunciation = delimiter.join(pronunciation_characters)
