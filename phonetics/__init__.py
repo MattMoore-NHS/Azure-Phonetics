@@ -1,49 +1,14 @@
-import logging
-
 import azure.functions as func
 
-import pronouncing
+import logging
 import json
+import requests
+import os
 
-
+NAMESHOUT_API_TOKEN = os.environ.get('NAMESHOUT_API_TOKEN')
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
-
-    MAPPING = {
-        'AA0':'aa',
-        'AA1':'aa',
-        'AA2':'aa',
-        'AE0':'a',
-        'AE1':'a',
-        'AH0':'ah',
-        'AH1':'ah',
-        'AO0':'ao',
-        'AO1':'ao',
-        'AW0':'aw',
-        'AW1':'aw',
-        'AY0':'ay',
-        'AY1':'ay',
-        'EH0':'eh',
-        'EH1':'eh',
-        'ER0':'er',
-        'ER1':'er',
-        'ER2':'er',
-        'EY0':'ey',
-        'EY1':'ey',
-        'IH0':'ih',
-        'IH1':'ih',
-        'IY0':'iy',
-        'IY1':'iy',
-        'OW0':'ow',
-        'OW1':'ow',
-        'OY0':'oy',
-        'OY1':'oy',
-        'UH0':'uh',
-        'UH1':'uh',
-        'UW0':'uw',
-        'UW1':'uw'
-    }
 
     name = req.params.get('name')
     logging.info("Name: %s" % name)
@@ -65,23 +30,24 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             return func.HttpResponse(status_code=400)
 
         try:
-            pronunciation_characters = []
-            phonetics = pronouncing.phones_for_word(name)
-            logging.info("Phonetic Spelling: %s" % phonetics)
-        
-            for phonetic in phonetics:
-                phonetic_characters = phonetic.split()
-                for character in phonetic_characters:
-                    if character in MAPPING:
-                        pronunciation_characters.append(MAPPING[character])
-                    else:
-                        pronunciation_characters.append(character)
+            pronunciation = ""
+            bearer_token = NAMESHOUT_API_TOKEN
+            url = "https://api.nameshouts.com/api/v2.0/name/%s/english" % name
+            headers = {
+                'Authorization': "Bearer %s" % bearer_token,
+                'Content-Type': "application/x-www-form-urlencoded"
+            }
 
-                break
-            
-            delimiter = '-'
-            pronunciation = delimiter.join(pronunciation_characters)
-            pronunciation.lower()
+            nameshout_response = requests.get(url, headers=headers)
+
+            if nameshout_response.status_code == 200:
+
+                json_response = nameshout_response.json()
+                name_res = json_response['name_res']
+   
+                if len(name_res) > 0:
+                    pronunciation = name_res[0]['name_phonetic']
+
         except ValueError:
             func.HttpResponse(status_code=500)
 
